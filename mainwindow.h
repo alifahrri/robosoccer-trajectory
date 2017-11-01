@@ -23,7 +23,8 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    QCPGraph *graph;
+    QCPGraph *pos_graph;
+    QCPGraph *vel_graph;
     Trajectory1D trajectory;
 };
 

@@ -6,12 +6,8 @@
 class Trajectory1D
 {
 public:
-//    enum Effort {
-//        ACCELERATE,
-//        DECELERERATE,
-//        CRUISE
-//    };
     enum Case {
+        INIT_STATE,
         ACCELERATION1,  //case 1
         ACCELERATION2,  //case 2.1
         CRUISING,       //case 2.2
@@ -28,12 +24,19 @@ public:
         double time;
         State term;
     };
-    typedef std::vector<Control> ControlSequence;
+
+    struct ControlSequence : std::vector<Control>
+    {
+        double final_time;
+    };
 
 public:
     Trajectory1D();
     void setLimit(double vmax=1.0, double amax=1.0);
-    ControlSequence optimalControl(State init_state, double final_state);
+    ControlSequence optimalControl(State init_state, double final_state, double& final_time);
+
+    static State getState(const ControlSequence &ctrl, double time);
+
 private:
     void case1(ControlSequence& ctrl_seq, State& init_state, double final);
     void case21(ControlSequence& ctrl_seq, State& init_state, double final);

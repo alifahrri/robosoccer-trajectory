@@ -15,10 +15,15 @@ void Trajectory1D::setLimit(double vmax, double amax)
     a_max = amax;
 }
 
-Trajectory1D::ControlSequence Trajectory1D::optimalControl(Trajectory1D::State init_state, double final_state)
+Trajectory1D::ControlSequence Trajectory1D::optimalControl(Trajectory1D::State init_state, double final_state, double &final_time)
 {
     ControlSequence ctrl_seq;
     State initial_state = init_state;
+    Control ctrl;
+    ctrl.term = init_state;
+    ctrl.time = 0.0;
+    ctrl_seq.push_back(ctrl);
+    double dist = 0.0;
 initial:
     double t = 0.0;
     double wf = final_state;
@@ -40,12 +45,39 @@ check_case :
         case3(ctrl_seq,initial_state,wf);
     t += ctrl_seq.back().time;
     wf -= ctrl_seq.back().term.w;
+    dist += ctrl_seq.back().term.w;
     initial_state.dw = ctrl_seq.back().term.dw;
     initial_state.dw *= sign(wf);
     wf *= sign(wf);
     if((ctrl_seq.back().term.dw != 0.0) || (ctrl_seq.back().control_case == ACCELERATION1))
         goto check_case;
+    final_time = t;
+    ctrl_seq.final_time = t;
     return ctrl_seq;
+}
+
+Trajectory1D::State Trajectory1D::getState(const Trajectory1D::ControlSequence &ctrl, double time)
+{
+    State s;
+    State s0 = {0.0,0.0};
+    double t = 0.0;
+    double dt = time;
+    for(int i=1; i<ctrl.size(); ++i)
+    {
+        auto sf = ctrl.at(i);
+        t += sf.time;
+        auto s_1 = ctrl.at(i-1).term;
+        s0.w += s_1.w;
+        s0.dw = s_1.dw;
+        if(time < t)
+        {
+            s.dw = s0.dw + sf.effort*dt;
+            s.w = s0.w + s0.dw*dt + sf.effort*dt*dt/2.0;
+            break;
+        }
+        dt -= sf.time;
+    }
+    return s;
 }
 
 inline
