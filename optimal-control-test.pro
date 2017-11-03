@@ -26,10 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     trajectory1d.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    dialog.cpp
 
 HEADERS  += mainwindow.h \
     trajectory1d.h \
-    qcustomplot.h
+    qcustomplot.h \
+    dialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    dialog.ui

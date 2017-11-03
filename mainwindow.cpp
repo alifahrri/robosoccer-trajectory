@@ -1,9 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    dialog(new Dialog(this))
 {
     ui->setupUi(this);
     pos_graph = ui->widget->addGraph();
@@ -11,6 +13,21 @@ MainWindow::MainWindow(QWidget *parent) :
     vel_graph->setPen(QPen(Qt::red));
     computeControl({0.0,0.5},3.0);
     setWindowTitle(QString("Optimal Control Test"));
+    connect(dialog,&Dialog::stateChanged,[=](double x0, double v0, double xf, double vmax, double amax)
+    {
+        computeControl({x0,v0},xf,vmax,amax);
+    });
+    connect(ui->actionDialog,&QAction::toggled,[=](bool checked)
+    {
+        if(checked && !dialog->isVisible())
+            dialog->show();
+        else if(!checked && dialog->isVisible())
+            dialog->hide();
+    });
+    connect(dialog,&QDialog::finished,[=]
+    {
+        ui->actionDialog->setChecked(false);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -19,10 +36,11 @@ MainWindow::~MainWindow()
 }
 
 inline
-void MainWindow::computeControl(Trajectory1D::State init, double final)
+void MainWindow::computeControl(Trajectory1D::State init, double final, double vmax, double amax)
 {
     printText("computing",Qt::green,Qt::darkGreen);
     double final_time = 0.0;
+    trajectory.setLimit(vmax,amax);
     auto ctrl = trajectory.optimalControl(init,final,final_time);
     printText("done : ");
     for(auto c : ctrl)
@@ -52,7 +70,7 @@ void MainWindow::computeControl(Trajectory1D::State init, double final)
         str.append(QString("effort : %1\n").arg(c.effort));
         printText(str);
     }
-    double time_step = 0.01;
+    double time_step = 0.005;
     int time_count = (int)(final_time/time_step);
     QVector<double> keys;
     QVector<double> pos_values;
@@ -67,6 +85,7 @@ void MainWindow::computeControl(Trajectory1D::State init, double final)
     pos_graph->setData(keys,pos_values);
     vel_graph->setData(keys,vel_values);
     ui->widget->xAxis->rescale(true);
+    ui->widget->yAxis->rescale(true);
     ui->widget->replot();
     printText(QString("time : %1").arg(final_time));
 }

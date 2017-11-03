@@ -7,7 +7,7 @@ class Trajectory1D
 {
 public:
     enum Case {
-        INIT_STATE,
+        INITIAL_STATE,
         ACCELERATION1,  //case 1
         ACCELERATION2,  //case 2.1
         CRUISING,       //case 2.2
@@ -28,6 +28,8 @@ public:
     struct ControlSequence : std::vector<Control>
     {
         double final_time;
+        double offset;
+        double distance;
     };
 
 public:
@@ -38,6 +40,7 @@ public:
     static State getState(const ControlSequence &ctrl, double time);
 
 private:
+    void applyControl(ControlSequence& ctrl_seq, State& init_state, double final);
     void case1(ControlSequence& ctrl_seq, State& init_state, double final);
     void case21(ControlSequence& ctrl_seq, State& init_state, double final);
     void case22(ControlSequence& ctrl_seq, State& init_state, double final);

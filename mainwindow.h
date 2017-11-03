@@ -8,6 +8,7 @@ namespace Ui {
 class MainWindow;
 }
 class QCPGraph;
+class Dialog;
 
 class MainWindow : public QMainWindow
 {
@@ -18,13 +19,14 @@ public:
     ~MainWindow();
 
 private:
-    void computeControl(Trajectory1D::State init, double final);
+    void computeControl(Trajectory1D::State init, double final, double vmax = 1.0, double amax = 1.0);
     void printText(QString txt, QColor color = Qt::black, QColor background = Qt::white);
 
 private:
     Ui::MainWindow *ui;
     QCPGraph *pos_graph;
     QCPGraph *vel_graph;
+    Dialog *dialog;
     Trajectory1D trajectory;
 };
 
