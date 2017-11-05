@@ -2,6 +2,7 @@
 #define TRAJECTORY1D_H
 
 #include <vector>
+#include <iostream>
 
 class Trajectory1D
 {
@@ -38,8 +39,9 @@ public:
     ControlSequence optimalControl(State init_state, double final_state, double& final_time);
 
     static State getState(const ControlSequence &ctrl, double time);
-
 private:
+    std::string str(State &s);
+    std::string str(Control &ctrl);
     void applyControl(ControlSequence& ctrl_seq, State& init_state, double final);
     void case1(ControlSequence& ctrl_seq, State& init_state, double final);
     void case21(ControlSequence& ctrl_seq, State& init_state, double final);
@@ -50,5 +52,7 @@ private:
     double v_max;
     double a_max;
 };
+
+std::ostream& operator << (std::ostream& out, const Trajectory1D::Control &ctrl);
 
 #endif // TRAJECTORY1D_H

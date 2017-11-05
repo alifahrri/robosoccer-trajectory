@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "dialog.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,7 +42,16 @@ void MainWindow::computeControl(Trajectory1D::State init, double final, double v
     printText("computing",Qt::green,Qt::darkGreen);
     double final_time = 0.0;
     trajectory.setLimit(vmax,amax);
-    auto ctrl = trajectory.optimalControl(init,final,final_time);
+    Trajectory1D::ControlSequence ctrl;
+    try {
+        ctrl = trajectory.optimalControl(init,final,final_time);
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+        exit(-1);
+    }
+
     printText("done : ");
     for(auto c : ctrl)
     {
@@ -70,7 +80,7 @@ void MainWindow::computeControl(Trajectory1D::State init, double final, double v
         str.append(QString("effort : %1\n").arg(c.effort));
         printText(str);
     }
-    double time_step = 0.005;
+    double time_step = 0.001;
     int time_count = (int)(final_time/time_step);
     QVector<double> keys;
     QVector<double> pos_values;

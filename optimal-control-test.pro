@@ -27,12 +27,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     trajectory1d.cpp \
     qcustomplot.cpp \
-    dialog.cpp
+    dialog.cpp \
+    trajectory2d.cpp
 
 HEADERS  += mainwindow.h \
     trajectory1d.h \
     qcustomplot.h \
-    dialog.h
+    dialog.h \
+    trajectory2d.h
 
 FORMS    += mainwindow.ui \
     dialog.ui
