@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>311</width>
-    <height>358</height>
+    <height>364</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -60,6 +60,20 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="initPosSBoxY">
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="initVelSBoxY">
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -92,6 +106,9 @@
          <string>pos : </string>
         </property>
        </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="finalPosSBoxY"/>
       </item>
      </layout>
     </widget>

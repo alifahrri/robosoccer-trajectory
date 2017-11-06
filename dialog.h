@@ -19,7 +19,7 @@ private:
     Ui::Dialog *ui;
 
 signals:
-    void stateChanged(double,double,double,double,double);
+    void stateChanged(double,double,double,double,double,double,double,double);
 };
 
 #endif // DIALOG_H
