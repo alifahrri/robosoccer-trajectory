@@ -8,6 +8,8 @@ QT       += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += c++11
+
 TARGET = optimal-control-test
 TEMPLATE = app
 
@@ -28,13 +30,24 @@ SOURCES += main.cpp\
     trajectory1d.cpp \
     qcustomplot.cpp \
     dialog.cpp \
-    trajectory2d.cpp
+    trajectory2d.cpp \
+    fielddialog.cpp \
+    robot.cpp \
+    graphicsview.cpp \
+    field.cpp \
+    trajectoryplanner.cpp
 
 HEADERS  += mainwindow.h \
     trajectory1d.h \
     qcustomplot.h \
     dialog.h \
-    trajectory2d.h
+    trajectory2d.h \
+    fielddialog.h \
+    robot.h \
+    graphicsview.h \
+    field.h \
+    trajectoryplanner.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    fielddialog.ui

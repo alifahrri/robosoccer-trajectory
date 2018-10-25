@@ -16,18 +16,18 @@ struct Control2D {
     Trajectory1D::Control y_ctrl;
 };
 
-class OptimalController
+class Controller
 {
 public:
     struct Control
     {
-        Trajectory1D::OptimalController::ControlSequence x;
-        Trajectory1D::OptimalController::ControlSequence y;
+        Trajectory1D::Controller::Control x;
+        Trajectory1D::Controller::Control y;
     };
-    typedef std::pair<std::vector<State2D>,double> Trajectory;
+    typedef std::pair<std::vector<State2D>,std::vector<double>> Trajectory;
 
 public:
-    OptimalController();
+    Controller();
     void setLimit(double vmax, double amax);
     Control optimalControl(State2D initial_state, double xf, double yf);
 

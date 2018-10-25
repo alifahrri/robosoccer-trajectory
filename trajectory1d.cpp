@@ -8,24 +8,24 @@
 
 using namespace Trajectory1D;
 
-OptimalController::OptimalController()
+Controller::Controller()
     : a_max(1.0),
       v_max(1.0)
 {
 
 }
 
-void OptimalController::setLimit(double vmax, double amax)
+void Controller::setLimit(double vmax, double amax)
 {
     v_max = vmax;
     a_max = amax;
 }
 
-OptimalController::ControlSequence OptimalController::optimalControl(Trajectory1D::State init_state, double final_state, double &final_time)
+Controller::Control Controller::optimalControl(Trajectory1D::State init_state, double final_state, double &final_time)
 {
-    ControlSequence ctrl_seq;
+    Control ctrl_seq;
     State initial_state = init_state;
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     ctrl.term = init_state;
     ctrl.time = 0.0;
     ctrl.effort = 0.0;
@@ -52,7 +52,7 @@ done:
     return ctrl_seq;
 }
 
-Trajectory1D::State OptimalController::getState(const OptimalController::ControlSequence &ctrl, double time)
+Trajectory1D::State Controller::getState(const Controller::Control &ctrl, double time)
 {
     State s;
     double t = 0.0;
@@ -73,7 +73,7 @@ Trajectory1D::State OptimalController::getState(const OptimalController::Control
     return s;
 }
 
-OptimalController::Trajectory OptimalController::getTrajectory(const OptimalController::ControlSequence &ctrl, double t0, double tf, double dt)
+Controller::Trajectory Controller::getTrajectory(const Controller::Control &ctrl, double t0, double tf, double dt)
 {
     Trajectory trajectory;
     int t_count = (int)((tf-t0)/dt);
@@ -92,7 +92,6 @@ OptimalController::Trajectory OptimalController::getTrajectory(const OptimalCont
             time_init = time;
             time += ctrl.at(idx).time;
         }
-//        const auto& s0 = ctrl.at(idx-1).term;
         const auto& c = ctrl.at(idx);
         auto vel = s0.dw + c.effort*dt;
         auto pos = s0.w + vel*dt;
@@ -100,18 +99,17 @@ OptimalController::Trajectory OptimalController::getTrajectory(const OptimalCont
         s0.dw = vel;
         trajectory.first.push_back({pos,vel});
         trajectory.second.push_back(t0 + now);
-//        {
-//            double dt = now-time_init;
-//            auto vel = s0.dw + c.effort*dt;
-//            auto pos = s0.w + s0.dw*dt + c.effort*dt*dt/2.0;
-//            trajectory.first.push_back({pos,vel});
-//            trajectory.second.push_back(t0 + now);
-//        }
+    }
+    if(trajectory.first.empty())
+    {
+        auto c = ctrl.at(0);
+        trajectory.first.push_back(c.term);
+        trajectory.second.push_back(t0);
     }
     return trajectory;
 }
 
-double OptimalController::setMaxEffort(OptimalController::ControlSequence &ctrl, double amax)
+double Controller::setMaxEffort(Controller::Control &ctrl, double amax)
 {
     auto final_time(0.0);
     auto s0 = ctrl.at(0).term;
@@ -166,7 +164,7 @@ double OptimalController::setMaxEffort(OptimalController::ControlSequence &ctrl,
     return final_time;
 }
 
-std::__cxx11::string OptimalController::str(Trajectory1D::State &s)
+std::__cxx11::string Controller::str(Trajectory1D::State &s)
 {
     std::stringstream str;
     str << "[" << s.w << "," << s.dw << "]";
@@ -174,7 +172,7 @@ std::__cxx11::string OptimalController::str(Trajectory1D::State &s)
 }
 
 inline
-void OptimalController::applyControl(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::applyControl(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
     double wf = final - init_state.w;
     double normal_wf = wf*sign(wf);
@@ -215,9 +213,9 @@ void OptimalController::applyControl(OptimalController::ControlSequence &ctrl_se
 }
 
 inline
-void OptimalController::case1(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::case1(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     ctrl.control_case = ACCELERATION1;
     ctrl.effort = a_max;
     ctrl.time = -init_state.dw/a_max;
@@ -232,9 +230,9 @@ void OptimalController::case1(OptimalController::ControlSequence &ctrl_seq, Traj
 }
 
 inline
-void OptimalController::case21(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::case21(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     double dw1 = sqrt((final*a_max)+(init_state.dw*init_state.dw/2.0));
     double t1 = (v_max-init_state.dw)/a_max;
     double t2 = (dw1-init_state.dw)/a_max;
@@ -263,9 +261,9 @@ void OptimalController::case21(OptimalController::ControlSequence &ctrl_seq, Tra
 }
 
 inline
-void OptimalController::case22(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::case22(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     ctrl.control_case = CRUISING;
     ctrl.effort = 0.0;
     ctrl.term.dw = v_max;
@@ -278,9 +276,9 @@ void OptimalController::case22(OptimalController::ControlSequence &ctrl_seq, Tra
 }
 
 inline
-void OptimalController::case23(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::case23(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     ctrl.control_case = DECELERATION1;
     ctrl.effort = -a_max;
     ctrl.term.dw = 0.0;
@@ -293,9 +291,9 @@ void OptimalController::case23(OptimalController::ControlSequence &ctrl_seq, Tra
 }
 
 inline
-void OptimalController::case3(OptimalController::ControlSequence &ctrl_seq, Trajectory1D::State &init_state, double final)
+void Controller::case3(Controller::Control &ctrl_seq, Trajectory1D::State &init_state, double final)
 {
-    Control ctrl;
+    Trajectory1D::Control ctrl;
     ctrl.control_case = DECELERATION2;
     ctrl.effort = -a_max;
     ctrl.term.dw = v_max;
@@ -316,7 +314,7 @@ std::ostream& operator <<(std::ostream &out, const Trajectory1D::Control &ctrl)
     return out;
 }
 
-std::__cxx11::string OptimalController::str(Trajectory1D::Control &ctrl)
+std::__cxx11::string Controller::str(Trajectory1D::Control &ctrl)
 {
     std::stringstream out;
     out << "[ effort : " << ctrl.effort << "; "

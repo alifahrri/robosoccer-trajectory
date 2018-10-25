@@ -28,11 +28,11 @@ struct Control {
     State term;
 };
 
-class OptimalController
+class Controller
 {
 public:
 
-    struct ControlSequence : std::vector<Control>
+    struct Control : std::vector<Trajectory1D::Control>
     {
         double final_time;
         double time_offset;
@@ -45,23 +45,23 @@ public:
     typedef std::pair<std::vector<State>,std::vector<double>> Trajectory;
 
 public:
-    OptimalController();
+    Controller();
     void setLimit(double vmax=1.0, double amax=1.0);
-    ControlSequence optimalControl(State init_state, double final_state, double& final_time);
+    Controller::Control optimalControl(State init_state, double final_state, double& final_time);
 
-    static State getState(const ControlSequence &ctrl, double time);
-    static Trajectory getTrajectory(const ControlSequence& ctrl, double t0, double tf, double dt);
-    static double setMaxEffort(ControlSequence &ctrl, double amax);
+    static State getState(const Controller::Control &ctrl, double time);
+    static Trajectory getTrajectory(const Controller::Control& ctrl, double t0, double tf, double dt);
+    static double setMaxEffort(Controller::Control &ctrl, double amax);
 
 private:
     std::string str(State &s);
-    std::string str(Control &ctrl);
-    void applyControl(ControlSequence& ctrl_seq, State& init_state, double final);
-    void case1(ControlSequence& ctrl_seq, State& init_state, double final);
-    void case21(ControlSequence& ctrl_seq, State& init_state, double final);
-    void case22(ControlSequence& ctrl_seq, State& init_state, double final);
-    void case23(ControlSequence& ctrl_seq, State& init_state, double final);
-    void case3(ControlSequence& ctrl_seq, State& init_state, double final);
+    std::string str(Trajectory1D::Control &ctrl);
+    void applyControl(Controller::Control& ctrl_seq, State& init_state, double final);
+    void case1(Controller::Control& ctrl_seq, State& init_state, double final);
+    void case21(Controller::Control& ctrl_seq, State& init_state, double final);
+    void case22(Controller::Control& ctrl_seq, State& init_state, double final);
+    void case23(Controller::Control& ctrl_seq, State& init_state, double final);
+    void case3(Controller::Control& ctrl_seq, State& init_state, double final);
 private:
     double v_max;
     double a_max;

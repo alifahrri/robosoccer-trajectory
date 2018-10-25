@@ -9,20 +9,20 @@
 
 using namespace Trajectory2D;
 
-OptimalController::OptimalController()
+Controller::Controller()
     : v_max(1.0),
       a_max(1.0)
 {
 
 }
 
-void OptimalController::setLimit(double vmax, double amax)
+void Controller::setLimit(double vmax, double amax)
 {
-    a_max = amax;
-    v_max = vmax;
+    a_max = sqrt(amax);
+    v_max = sqrt(vmax);
 }
 
-OptimalController::Control OptimalController::optimalControl(Trajectory2D::State2D initial_state, double xf, double yf)
+Controller::Control Controller::optimalControl(Trajectory2D::State2D initial_state, double xf, double yf)
 {
     double alpha = 45.0;
     double alpha_min(0.0);
@@ -32,8 +32,8 @@ OptimalController::Control OptimalController::optimalControl(Trajectory2D::State
     double vx_max(1.0);
     double vy_max(1.0);
 
-    Trajectory1D::OptimalController x_trajectory;
-    Trajectory1D::OptimalController y_trajectory;
+    Trajectory1D::Controller x_trajectory;
+    Trajectory1D::Controller y_trajectory;
 
     auto tx(0.0);
     auto ty(0.0);
@@ -53,6 +53,18 @@ find_minimum_time:
     auto dt = fabs(tx-ty);
     if(dt<0.01)
         goto done;
+    else if(tx==0.0)
+    {
+        y_trajectory.setLimit(v_max,a_max);
+        y_ctrl = y_trajectory.optimalControl(initial_state.y,yf,ty);;
+        goto done;
+    }
+    else if(ty==0.0)
+    {
+        x_trajectory.setLimit(v_max,a_max);
+        x_ctrl = x_trajectory.optimalControl(initial_state.x,xf,tx);;
+        goto done;
+    }
 
     if(tx>ty)
     {
@@ -68,5 +80,6 @@ find_minimum_time:
     qDebug() << dt << alpha << alpha_min << alpha_max;
     goto find_minimum_time;
 done:
+    qDebug() << alpha << ax_max << ay_max << vx_max << vy_max;
     return Control({x_ctrl,y_ctrl});
 }
